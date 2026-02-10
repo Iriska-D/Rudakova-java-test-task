@@ -99,6 +99,8 @@ public class Main {
         String filePath = "", firstName = "";
         char stat = ' ';
         boolean add = false;
+        String [] inputFiles = new String[20];
+        int j = 0;
         for(int i = 0; i < args.length; i++){
             switch(args[i]){
                 case "-o":
@@ -121,6 +123,10 @@ public class Main {
                     break;
                 case "-f":
                     stat = 'f';
+                    break;
+                default:
+                    inputFiles[j] = args[i];
+                    j++;
                     break;
             }
         }
@@ -146,23 +152,27 @@ public class Main {
                     Files.writeString(Paths.get(filePath + firstName + txt), "");
                 }
             }
-            Scanner sc = new Scanner(new File("example.txt"));
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine();
-                if(stat == 's'){
-                    statistic = smallStat(statistic, wordCheck(line));
+            for(String inputFile : inputFiles){
+                if(inputFile == null)
+                    break;
+                Scanner sc = new Scanner(new File(inputFile));
+                while (sc.hasNextLine()) {
+                    String line = sc.nextLine();
+                    if(stat == 's'){
+                        statistic = smallStat(statistic, wordCheck(line));
+                    }
+                    else if (stat == 'f'){
+                        statistic = bigStat(statistic, wordCheck(line), line);
+                    }
+                    
+                    Path pathToFile = Paths.get(filePath + firstName + wordCheck(line)); 
+                    if (!Files.exists(pathToFile)) { 
+                        Files.createFile(pathToFile);
+                    }
+                    Files.writeString(pathToFile, line + '\n', StandardOpenOption.APPEND);
                 }
-                else if (stat == 'f'){
-                    statistic = bigStat(statistic, wordCheck(line), line);
-                }
-                
-                Path pathToFile = Paths.get(filePath + firstName + wordCheck(line)); 
-                if (!Files.exists(pathToFile)) { 
-                    Files.createFile(pathToFile);
-                }
-                Files.writeString(pathToFile, line + '\n', StandardOpenOption.APPEND);
+                sc.close();
             }
-            sc.close();
             if(stat != ' ')
                 output(statistic, lastNames, firstName);
         }
